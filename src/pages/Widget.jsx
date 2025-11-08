@@ -223,8 +223,8 @@ export default function Widget() {
             >
               {isPlaying ? (
                 <svg
-                  width="26"
-                  height="26"
+                  width="30"
+                  height="30"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -232,8 +232,8 @@ export default function Widget() {
                 </svg>
               ) : (
                 <svg
-                  width="26"
-                  height="26"
+                  width="30"
+                  height="30"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -243,7 +243,7 @@ export default function Widget() {
             </button>
 
             {/* RIGHT: Playlist + Close (satu baris, ada jarak) */}
-            <div className="flex items-center justify-end gap-4">
+            <div className="flex items-center justify-end gap-2">
               <button
                 onClick={() => setShowList((s) => !s)}
                 className="w-9 h-9 flex items-center justify-center text-black"
