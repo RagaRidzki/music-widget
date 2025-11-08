@@ -2,11 +2,12 @@ import { useState } from "react";
 import { supabase } from "../supabaseClient";
 
 export default function Create() {
+  
   const [files, setFiles] = useState([]);
   const [status, setStatus] = useState("");
   const [slug, setSlug] = useState(""); // hanya untuk info setelah selesai
-
-  // minta signed URL + upload 1 file
+  
+  // minta signed URL + upload 1 file 
   async function uploadOneFile(file, slugArg, index) {
     const resp = await fetch("/api/upload-intent", {
       method: "POST",
