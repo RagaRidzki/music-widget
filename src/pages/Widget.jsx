@@ -131,6 +131,35 @@ export default function Widget() {
     );
   }
 
+  async function handleTrackClick(i) {
+    const el = audioRef.current;
+    if (!el) return;
+    if (i === idx) {
+      // klik track yang sedang aktif → toggle play/pause
+      try {
+        if (el.paused) {
+          await el.play();
+          setIsPlaying(true);
+        } else {
+          el.pause();
+          setIsPlaying(false);
+        }
+      } catch (e) {
+        /* ignore */
+      }
+    } else {
+      // pindah track → set index, lalu auto play
+      setIdx(i);
+      // beri sedikit jeda agar source berubah dulu
+      setTimeout(async () => {
+        try {
+          await el.play();
+          setIsPlaying(true);
+        } catch {}
+      }, 50);
+    }
+  }
+
   return (
     <div className="fixed bottom-4 right-4 z-50">
       <div className="relative w-40">
@@ -139,7 +168,7 @@ export default function Widget() {
           <div
             className="
               absolute bottom-full right-0 mb-3
-              w-[320px] max-w-[min(90vw,320px)]
+              w-[260px] max-w-[min(90vw,260px)]
               bg-white border border-gray-200 rounded-xl
               shadow-[0_12px_32px_rgba(0,0,0,0.15)] overflow-hidden"
           >
@@ -149,16 +178,14 @@ export default function Widget() {
                 return (
                   <button
                     key={t.id || i}
-                    onClick={() => {
-                      setIdx(i);
-                    }}
-                    className={`w-full text-left px-4 py-3 flex items-center gap-3
+                    onClick={() => handleTrackClick(i)}
+                    className={`w-full text-left px-3.5 py-2.5 flex items-center gap-3
                             hover:bg-gray-50 transition ${
                               active ? "bg-gray-50" : ""
                             }`}
                   >
                     <div
-                      className={`w-10 h-10 rounded
+                      className={`w-9 h-9 rounded
                                  ${active ? "bg-gray-900" : "bg-gray-200"}
                                  flex items-center justify-center text-white`}
                     >
@@ -218,7 +245,7 @@ export default function Widget() {
             {/* LEFT: Play/Pause (lebih besar) */}
             <button
               onClick={togglePlay}
-              className="w-10 h-10 flex items-center justify-center text-black"
+              className="w-12 h-12 flex items-center justify-center text-black"
               title="Play/Pause"
             >
               {isPlaying ? (
@@ -246,7 +273,7 @@ export default function Widget() {
             <div className="flex items-center justify-end gap-2">
               <button
                 onClick={() => setShowList((s) => !s)}
-                className="w-9 h-9 flex items-center justify-center text-black"
+                className="w-8 h-8 flex items-center justify-center text-black"
                 title="Playlist"
               >
                 <svg
@@ -261,7 +288,7 @@ export default function Widget() {
 
               <button
                 onClick={() => setOpen(false)}
-                className="w-9 h-9 flex items-center justify-center text-black"
+                className="w-8 h-8 flex items-center justify-center text-black"
                 title="Close"
               >
                 <svg
