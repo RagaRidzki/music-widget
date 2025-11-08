@@ -85,20 +85,14 @@ export default function Widget() {
   if (loading || !widget || !open) {
     // saat ditutup, jangan render apa-apa
     if (!open) return null;
-    return <div className="fixed bottom-4 right-4 bg-white text-gray-900 rounded-xl shadow-lg p-3">Loading…</div>;
+    return <div className="fixed bottom-4 right-4 bg-white text-gray-900 rounded-md shadow-lg p-3">Loading…</div>;
   }
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
       {/* Panel utama (putih) */}
       <div className="bg-white text-gray-900 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-gray-200 w-[320px] overflow-hidden">
-        {/* Header mini */}
-        <div className="px-4 pt-4">
-          <div className="text-sm font-semibold truncate">{widget.title || `Widget ${widget.slug}`}</div>
-          <div className="text-xs text-gray-500">Track {idx + 1} / {tracks.length}</div>
-        </div>
 
-        {/* Audio native (hidden bar; kita kontrol via tombol) */}
         <audio
           ref={audioRef}
           key={srcUrl}
@@ -116,10 +110,10 @@ export default function Widget() {
         </audio>
 
         {/* Row current track */}
-        <div className="px-4 py-3">
+        {/* <div className="px-4 py-3">
           <div className="text-base font-semibold truncate">{current?.title || `Track ${idx + 1}`}</div>
           {current?.artist && <div className="text-xs text-gray-500 truncate">{current.artist}</div>}
-        </div>
+        </div> */}
 
         {/* Controls bar */}
         <div className="flex items-center gap-2 px-3 pb-3">
@@ -127,7 +121,7 @@ export default function Widget() {
           <button
             onClick={togglePlay}
             title="Play/Pause"
-            className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-900 text-white hover:bg-black transition"
+            className="flex items-center justify-center w-10 h-10 rounded-md bg-gray-900 text-white hover:bg-black transition"
           >
             {isPlaying ? (
               // pause icon
@@ -142,7 +136,7 @@ export default function Widget() {
           <button
             onClick={() => setShowList((s) => !s)}
             title="Playlist"
-            className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 text-gray-900 hover:bg-gray-200 transition"
+            className="flex items-center justify-center w-10 h-10 rounded-md bg-gray-100 text-gray-900 hover:bg-gray-200 transition"
           >
             {/* list icon */}
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -154,7 +148,7 @@ export default function Widget() {
           <button
             onClick={() => setOpen(false)}
             title="Close"
-            className="ml-auto flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 text-gray-900 hover:bg-gray-200 transition"
+            className="ml-auto flex items-center justify-center w-10 h-10 rounded-md bg-gray-100 text-gray-900 hover:bg-gray-200 transition"
           >
             {/* close icon */}
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
