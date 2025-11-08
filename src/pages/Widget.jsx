@@ -133,18 +133,15 @@ export default function Widget() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      {/* wrapper: samakan lebar pill & playlist */}
-      <div className="relative w-[300px]">
+      <div className="relative w-60">
         {" "}
-        {/* <= dari 340px -> 300px */}
-        {/* PLAYLIST: muncul ke atas, lebar persis */}
         {showList && (
           <div
             className="absolute bottom-full left-0 mb-2 w-full
                       bg-white border border-gray-200 rounded-lg
                       shadow-[0_8px_24px_rgba(0,0,0,0.12)] overflow-hidden"
           >
-            <div className="max-h-60 overflow-auto">
+            <div className="max-h-56 overflow-auto">
               {tracks.map((t, i) => {
                 const active = i === idx;
                 return (
@@ -159,7 +156,7 @@ export default function Widget() {
                             }`}
                   >
                     <div
-                      className={`w-9 h-9 rounded
+                      className={`w-8 h-8 rounded
                                  ${active ? "bg-gray-900" : "bg-gray-200"}
                                  flex items-center justify-center text-white`}
                     >
@@ -218,7 +215,7 @@ export default function Widget() {
           className="w-full bg-white border border-gray-200 rounded-lg
                     shadow-[0_6px_20px_rgba(0,0,0,0.10)]"
         >
-          <div className="grid grid-cols-3 place-items-center px-4 py-2.5">
+          <div className="grid grid-cols-3 place-items-center px-2.5 py-2">
             {/* Play/Pause */}
             <button
               onClick={togglePlay}
@@ -227,8 +224,8 @@ export default function Widget() {
             >
               {isPlaying ? (
                 <svg
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -236,8 +233,8 @@ export default function Widget() {
                 </svg>
               ) : (
                 <svg
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -253,8 +250,8 @@ export default function Widget() {
               title="Playlist"
             >
               <svg
-                width="20"
-                height="20"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
@@ -269,8 +266,8 @@ export default function Widget() {
               title="Close"
             >
               <svg
-                width="20"
-                height="20"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
