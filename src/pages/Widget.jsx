@@ -127,7 +127,7 @@ export default function Widget() {
     // saat ditutup, jangan render apa-apa
     if (!open) return null;
     return (
-      <div className="fixed bottom-4 right-4 bg-white text-gray-900 rounded-xl shadow-lg p-3">
+      <div className="fixed bottom-4 right-4 bg-white text-gray-900 rounded-lg shadow-lg p-3">
         Loading…
       </div>
     );
@@ -136,7 +136,7 @@ export default function Widget() {
   if (!open) return null;
   if (loading || !widget) {
     return (
-      <div className="fixed bottom-4 right-4 bg-white text-gray-900 rounded-md shadow-lg px-4 py-2.5 text-sm">
+      <div className="fixed bottom-4 right-4 bg-white text-gray-900 rounded-lg shadow-lg px-4 py-2.5 text-sm">
         Loading…
       </div>
     );
@@ -184,10 +184,10 @@ export default function Widget() {
         {" "}
         {showList && (
           <div
-            className="
+            className="c:\Users\ASUS\Downloads\demo.mp3
               absolute bottom-full right-0 mb-3
               w-[260px] max-w-[min(90vw,260px)]
-              bg-white border border-gray-200 rounded-xl
+              bg-white border border-gray-200 rounded-lg
               shadow-[0_12px_32px_rgba(0,0,0,0.15)] overflow-hidden"
           >
             <div className="max-h-64 overflow-auto">

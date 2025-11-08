@@ -95,46 +95,131 @@ export default function Create() {
     }
   }
 
+  const onInputChange = (e) => setFiles(Array.from(e.target.files || []));
+  const onDrop = (e) => {
+    e.preventDefault();
+    const dropped = Array.from(e.dataTransfer.files || []).filter((f) =>
+      /audio\/(mp3|mpeg|ogg|m4a)/.test(f.type)
+    );
+    setFiles(dropped);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-6">
-      <h1 className="text-3xl font-bold mb-4">Create Widget</h1>
+    <div className="min-h-screen bg-neutral-950 text-white">
+      <div className="mx-auto w-full max-w-3xl px-6 py-10">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Buat Widget Baru
+          </h1>
+          <p className="mt-2 text-sm text-neutral-400">
+            Upload sampai <span className="font-medium text-neutral-300">3 lagu</span> (mp3/ogg/m4a, max ~100MB/lagu),
+            lalu kami buatkan widget playlist-mu otomatis.
+          </p>
+        </div>
 
-      <input
-        type="file"
-        accept="audio/mp3,audio/mpeg,audio/ogg,audio/m4a"
-        multiple
-        onChange={(e) => setFiles(Array.from(e.target.files))}
-        className="mb-4"
-      />
+        {/* Card Upload */}
+        <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+          {/* Dropzone */}
+          <div
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={onDrop}
+            className="mx-6 mt-6 rounded-xl border border-dashed border-neutral-700 bg-neutral-900/60"
+          >
+            <div className="flex flex-col items-center justify-center px-6 py-10 text-center">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-800/70">
+                {/* cloud upload icon */}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.35 10.04A7 7 0 005.3 7.1a5.5 5.5 0 00.8 10.9h12.2a4.5 4.5 0 001.05-8.96zM13 12v4h-2v-4H8l4-4 4 4h-3z"/>
+                </svg>
+              </div>
 
-      <div className="flex gap-2">
-        <button
-          onClick={handleUpload}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
-        >
-          Upload & Buat Widget
-        </button>
+              <h2 className="text-lg font-medium">Drag & drop lagu kamu di sini</h2>
+              <p className="mt-1 text-xs text-neutral-400">
+                Format: mp3, ogg, m4a • Maksimal 3 file
+              </p>
 
-        {/* Tombol reset batch biar jelas mulai widget baru */}
-        <button
-          onClick={() => {
-            setFiles([]);
-            setSlug("");
-            setStatus("Siap bikin widget baru.");
-            // localStorage.removeItem("slug"); // kalau sebelumnya kamu simpan
-          }}
-          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg"
-        >
-          New Widget
-        </button>
+              <label className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-200 active:scale-[0.98]">
+                <input
+                  type="file"
+                  accept="audio/mp3,audio/mpeg,audio/ogg,audio/m4a"
+                  multiple
+                  onChange={onInputChange}
+                  className="hidden"
+                />
+                PILIH FILES
+              </label>
+
+              {files.length === 0 && (
+                <p className="mt-3 text-xs text-neutral-500">atau seret file ke area ini</p>
+              )}
+            </div>
+          </div>
+
+          {/* Preview daftar file */}
+          {files.length > 0 && (
+            <div className="mx-6 mt-6 rounded-xl border border-neutral-800 bg-neutral-900/40">
+              <div className="divide-y divide-neutral-800">
+                {files.map((f, i) => (
+                  <div key={i} className="flex items-center gap-3 px-4 py-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-md bg-neutral-800/70">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium">{f.name.replace(/\.[^.]+$/, "")}</div>
+                      <div className="truncate text-xs text-neutral-400">
+                        {(f.size / (1024 * 1024)).toFixed(1)} MB • {f.type || "audio"}
+                      </div>
+                    </div>
+                    <div className="text-xs text-neutral-500">#{i + 1}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-6">
+            <div className="text-xs text-neutral-500">
+              Tips: Upload batch = 1 widget. Upload batch baru → widget baru.
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setFiles([]);
+                  setSlug("");
+                  setStatus("Siap bikin widget baru.");
+                }}
+                className="rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm hover:bg-neutral-800"
+              >
+                Reset
+              </button>
+              <button
+                onClick={handleUpload}
+                className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-900 hover:bg-emerald-400 disabled:opacity-50"
+                disabled={files.length === 0}
+              >
+                Upload & Buat Widget
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Status & link hasil */}
+        <div className="mt-6 flex items-center justify-between">
+          <p className="text-sm text-neutral-300">{status}</p>
+          {slug && (
+            <a
+              href={`/${slug}`}
+              className="rounded-md bg-neutral-800 px-3 py-1.5 text-sm text-white underline-offset-4 hover:underline"
+            >
+              Buka /{slug}
+            </a>
+          )}
+        </div>
       </div>
-
-      <p className="mt-4">{status}</p>
-      {slug && (
-        <a href={`/${slug}`} className="mt-2 underline text-emerald-400">
-          Buka widget /{slug}
-        </a>
-      )}
     </div>
   );
 }
