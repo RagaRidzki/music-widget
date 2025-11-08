@@ -133,11 +133,17 @@ export default function Widget() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      {/* Wrapper agar playlist sejajar dengan pill */}
-      <div className="relative w-[340px]">
-        {/* PLAYLIST – muncul ke ATAS, lebar sama persis */}
+      {/* wrapper: samakan lebar pill & playlist */}
+      <div className="relative w-[300px]">
+        {" "}
+        {/* <= dari 340px -> 300px */}
+        {/* PLAYLIST: muncul ke atas, lebar persis */}
         {showList && (
-          <div className="absolute bottom-full left-0 mb-2 w-full bg-white border border-gray-200 shadow-[0_10px_30px_rgba(0,0,0,0.12)] rounded-lg overflow-hidden">
+          <div
+            className="absolute bottom-full left-0 mb-2 w-full
+                      bg-white border border-gray-200 rounded-lg
+                      shadow-[0_8px_24px_rgba(0,0,0,0.12)] overflow-hidden"
+          >
             <div className="max-h-60 overflow-auto">
               {tracks.map((t, i) => {
                 const active = i === idx;
@@ -147,19 +153,20 @@ export default function Widget() {
                     onClick={() => {
                       setIdx(i);
                     }}
-                    className={`w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition ${
-                      active ? "bg-gray-50" : ""
-                    }`}
+                    className={`w-full text-left px-3 py-2.5 flex items-center gap-3
+                            hover:bg-gray-50 transition ${
+                              active ? "bg-gray-50" : ""
+                            }`}
                   >
                     <div
-                      className={`w-10 h-10 rounded ${
-                        active ? "bg-gray-900" : "bg-gray-200"
-                      } flex items-center justify-center text-white`}
+                      className={`w-9 h-9 rounded
+                                 ${active ? "bg-gray-900" : "bg-gray-200"}
+                                 flex items-center justify-center text-white`}
                     >
                       {active ? (
                         <svg
-                          width="16"
-                          height="16"
+                          width="15"
+                          height="15"
                           viewBox="0 0 24 24"
                           fill="currentColor"
                         >
@@ -167,11 +174,11 @@ export default function Widget() {
                         </svg>
                       ) : (
                         <svg
-                          width="16"
-                          height="16"
+                          width="15"
+                          height="15"
                           viewBox="0 0 24 24"
                           fill="currentColor"
-                          className="text-gray-600"
+                          className="text-gray-700"
                         >
                           <path d="M8 5v14l11-7z" />
                         </svg>
@@ -206,20 +213,22 @@ export default function Widget() {
             </div>
           </div>
         )}
-
-        {/* PILL KONTROL – lebih besar & ikon lebih besar */}
-        <div className="w-full bg-white border border-gray-200 rounded-lg shadow-[0_6px_24px_rgba(0,0,0,0.12)]">
-          <div className="grid grid-cols-3 place-items-center px-5 py-3">
+        {/* PILL kontrol: lebih kecil, ikon sedikit lebih besar, spacing pas */}
+        <div
+          className="w-full bg-white border border-gray-200 rounded-lg
+                    shadow-[0_6px_20px_rgba(0,0,0,0.10)]"
+        >
+          <div className="grid grid-cols-3 place-items-center px-4 py-2.5">
             {/* Play/Pause */}
             <button
               onClick={togglePlay}
-              className="w-8 h-8 flex items-center justify-center text-black"
+              className="w-7 h-7 flex items-center justify-center text-black"
               title="Play/Pause"
             >
               {isPlaying ? (
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -227,8 +236,8 @@ export default function Widget() {
                 </svg>
               ) : (
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -240,12 +249,12 @@ export default function Widget() {
             {/* Playlist */}
             <button
               onClick={() => setShowList((s) => !s)}
-              className="w-8 h-8 flex items-center justify-center text-black"
+              className="w-7 h-7 flex items-center justify-center text-black"
               title="Playlist"
             >
               <svg
-                width="22"
-                height="22"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
@@ -256,12 +265,12 @@ export default function Widget() {
             {/* Close */}
             <button
               onClick={() => setOpen(false)}
-              className="w-8 h-8 flex items-center justify-center text-black"
+              className="w-7 h-7 flex items-center justify-center text-black"
               title="Close"
             >
               <svg
-                width="22"
-                height="22"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
@@ -270,8 +279,7 @@ export default function Widget() {
             </button>
           </div>
         </div>
-
-        {/* AUDIO (tetap tersembunyi) */}
+        {/* AUDIO (tetap) */}
         <audio
           ref={audioRef}
           key={srcUrl}
