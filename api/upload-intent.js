@@ -29,13 +29,14 @@ export default async function handler(req, res) {
 
         const path = `${theSlug}/${orderIndex}.${ext}`;
 
-        const { data, error } = await supabaseAdmin.storage
+        const { data, error } = await supabaseAdmin
+            .storage
             .from(BUCKET)
-            .createSignedUploadUrl(path);
+            .createSignedUploadUrl(path, { upsert: true });
 
         if (error) {
             console.error("createSignedUploadUrl error:", error);
-            return res.status(500).json({ error: "Failed to create signed URL" });
+            return res.status(500).json({ error: error.message || "Create signed URL failed", details: error });
         }
 
         const { signedUrl, token } = data;
