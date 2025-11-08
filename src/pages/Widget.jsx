@@ -12,6 +12,9 @@ export default function Widget() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
   const [dbg, setDbg] = useState("");
+  const playTimerRef = useRef(null); // nyimpen timer autoplay fallback
+  const autoplayAfterSrcRef = useRef(false); // flag: sekali autoplay setelah source baru siap
+  const switchingRef = useRef(false);
 
   // fetch widget
   useEffect(() => {
@@ -49,25 +52,21 @@ export default function Widget() {
   const current = tracks[idx];
   const srcUrl = (current?.url || current?.publicUrl || "").trim();
 
-  // autoplay on track change
+  // minta autoplay SEKALI setelah source siap (lewat onCanPlay)
   useEffect(() => {
-    const el = audioRef.current;
-    if (!el) return;
-    const playLater = setTimeout(async () => {
-      try {
-        await el.play();
-        setIsPlaying(true);
-      } catch (e) {
-        setDbg(`autoplay blocked: ${e?.message || e}`);
-        setIsPlaying(false);
-      }
-    }, 60);
-    return () => clearTimeout(playLater);
+    if (playTimerRef.current) {
+      clearTimeout(playTimerRef.current);
+      playTimerRef.current = null;
+    }
+    autoplayAfterSrcRef.current = true;
+    switchingRef.current = false;
   }, [srcUrl]);
+
+  
 
   const onLoadedMeta = (e) =>
     setDbg(`loadedmetadata: ${e.target.duration?.toFixed?.(2) ?? "n/a"}s`);
-  const onCanPlay = () => setDbg((p) => (p ? p + " | canplay" : "canplay"));
+  // const onCanPlay = () => setDbg((p) => (p ? p + " | canplay" : "canplay"));
   const onPlay = () => setIsPlaying(true);
   const onPause = () => setIsPlaying(false);
   const onEnded = () => next(); // auto next
@@ -81,6 +80,8 @@ export default function Widget() {
       src: el.currentSrc,
     });
   };
+
+  
 
   const guessType = () => {
     const u = srcUrl.toLowerCase();
@@ -96,9 +97,23 @@ export default function Widget() {
   function next() {
     setIdx((i) => (i + 1) % tracks.length);
   }
+  const onCanPlay = async () => {
+    if (autoplayAfterSrcRef.current) {
+      autoplayAfterSrcRef.current = false;
+      try {
+        await audioRef.current.play();
+        setIsPlaying(true);
+      } catch (e) {
+        setDbg(`autoplay blocked: ${e?.message || e}`);
+        setIsPlaying(false);
+      }
+    }
+  };
+  
   async function togglePlay() {
     const el = audioRef.current;
     if (!el) return;
+    if (switchingRef.current) return; // cegah spam saat switch
     try {
       if (el.paused) {
         await el.play();
@@ -111,6 +126,7 @@ export default function Widget() {
       setDbg(`play error: ${e?.message || e}`);
     }
   }
+  
 
   if (loading || !widget || !open) {
     // saat ditutup, jangan render apa-apa
@@ -134,31 +150,37 @@ export default function Widget() {
   async function handleTrackClick(i) {
     const el = audioRef.current;
     if (!el) return;
-    if (i === idx) {
-      // klik track yang sedang aktif → toggle play/pause
-      try {
-        if (el.paused) {
-          await el.play();
-          setIsPlaying(true);
-        } else {
-          el.pause();
-          setIsPlaying(false);
-        }
-      } catch (e) {
-        /* ignore */
-      }
-    } else {
-      // pindah track → set index, lalu auto play
-      setIdx(i);
-      // beri sedikit jeda agar source berubah dulu
-      setTimeout(async () => {
-        try {
-          await el.play();
-          setIsPlaying(true);
-        } catch {}
-      }, 50);
+  
+    // bersihkan timer autoplay sebelumnya
+    if (playTimerRef.current) {
+      clearTimeout(playTimerRef.current);
+      playTimerRef.current = null;
     }
+  
+    if (i === idx) {
+      // track aktif -> toggle play/pause
+      return togglePlay();
+    }
+  
+    // ganti track: pause, reset posisi, lock switching
+    switchingRef.current = true;
+    try { el.pause(); } catch {}
+    el.currentTime = 0;
+  
+    // minta autoplay sekali ketika source baru siap
+    autoplayAfterSrcRef.current = true;
+    setIdx(i);
+  
+    // fallback tipis jika onCanPlay telat
+    playTimerRef.current = setTimeout(async () => {
+      try {
+        await el.play();
+        setIsPlaying(true);
+      } catch {}
+      switchingRef.current = false;
+    }, 120);
   }
+  
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
@@ -310,6 +332,7 @@ export default function Widget() {
           className="hidden"
           preload="auto"
           crossOrigin="anonymous"
+          onCanPlay={onCanPlay}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onEnded={() => setIdx((i) => (i + 1) % tracks.length)}
