@@ -4,5 +4,4 @@ export default function Widget() {
         <h1 className="text-3xl font-bold">Widget Player Page</h1>
       </div>
     );
-  }
-  
+  }  
