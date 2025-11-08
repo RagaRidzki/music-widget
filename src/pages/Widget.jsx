@@ -91,7 +91,7 @@ export default function Widget() {
   return (
     <div className="fixed bottom-4 right-4 z-50">
       {/* Panel utama (putih) */}
-      <div className="bg-white text-gray-900 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-gray-200 w-[320px] p-10 overflow-hidden">
+      <div className="bg-white text-gray-900 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-gray-200 w-[120px] p-8 overflow-hidden">
         <audio
           ref={audioRef}
           key={srcUrl}
