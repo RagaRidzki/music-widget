@@ -71,7 +71,14 @@ export default function Create() {
             .sort((a, b) => a.orderIndex - b.orderIndex)
             .slice(0, 3),
         }),
-      }).then((r) => r.json());
+      }).then(async (r) => {
+        const txt = await r.text();
+        try {
+          return JSON.parse(txt);
+        } catch {
+          throw new Error(`Non-JSON (${r.status})`);
+        }
+      });
 
       if (save?.error) throw new Error(save.error);
 

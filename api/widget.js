@@ -1,21 +1,14 @@
-// /api/widgets.js
 import { supabaseAdmin } from "./_supabaseAdmin.js";
 
-function ok(res, body) {
+function withCors(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  return res.status(200).json(body);
 }
 
 export default async function handler(req, res) {
-  // handle OPTIONS (preflight)
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    return res.status(200).end();
-  }
+  withCors(res);
+  if (req.method === "OPTIONS") return res.status(200).end();
 
   try {
     if (req.method === "POST") {
@@ -42,7 +35,7 @@ export default async function handler(req, res) {
         .single();
 
       if (error) return res.status(500).json({ error: error.message });
-      return ok(res, { widget: data });
+      return res.status(200).json({ widget: data });
     }
 
     if (req.method === "GET") {
@@ -59,7 +52,7 @@ export default async function handler(req, res) {
         const code = error.code === "PGRST116" ? 404 : 500;
         return res.status(code).json({ error: error.message });
       }
-      return ok(res, { widget: data });
+      return res.status(200).json({ widget: data });
     }
 
     return res.status(405).json({ error: "Method not allowed" });

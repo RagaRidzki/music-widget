@@ -13,7 +13,17 @@ export default function Widget() {
     async function run() {
       setLoading(true);
       try {
-        const resp = await fetch(`/api/widgets?slug=${encodeURIComponent(slug)}`).then(r => r.json());
+        const resp = await fetch(
+          `/api/widgets?slug=${encodeURIComponent(slug)}`
+        ).then(async (r) => {
+          const text = await r.text(); // baca mentah
+          try {
+            return JSON.parse(text);
+          } catch {
+            // coba JSON
+            return { error: `Non-JSON (${r.status})`, raw: text };
+          } // fallback
+        });
         if (!active) return;
         if (resp.error) throw new Error(resp.error);
         setWidget(resp.widget);
@@ -26,16 +36,18 @@ export default function Widget() {
       }
     }
     run();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [slug]);
 
   const tracks = useMemo(() => widget?.tracks || [], [widget]);
 
   function prev() {
-    setIdx(i => (i - 1 + tracks.length) % tracks.length);
+    setIdx((i) => (i - 1 + tracks.length) % tracks.length);
   }
   function next() {
-    setIdx(i => (i + 1) % tracks.length);
+    setIdx((i) => (i + 1) % tracks.length);
   }
 
   if (loading) {
@@ -50,7 +62,9 @@ export default function Widget() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-800 text-white gap-3">
         <div className="text-xl">Widget tidak ditemukan</div>
-        <Link className="underline" to="/create">Buat baru</Link>
+        <Link className="underline" to="/create">
+          Buat baru
+        </Link>
       </div>
     );
   }
@@ -61,7 +75,9 @@ export default function Widget() {
     <div className="min-h-screen flex items-center justify-center bg-gray-800 text-white p-6">
       <div className="w-full max-w-xl rounded-2xl bg-gray-900 p-6 shadow-lg border border-gray-700">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">{widget.title || `Widget ${widget.slug}`}</h1>
+          <h1 className="text-2xl font-bold">
+            {widget.title || `Widget ${widget.slug}`}
+          </h1>
           <span className="text-sm opacity-70">/{widget.slug}</span>
         </div>
 
