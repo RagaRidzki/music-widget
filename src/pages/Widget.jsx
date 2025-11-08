@@ -133,15 +133,17 @@ export default function Widget() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <div className="relative w-60">
+      <div className="relative w-[232px]">
         {" "}
         {showList && (
           <div
-            className="absolute bottom-full left-0 mb-2 w-full
-                      bg-white border border-gray-200 rounded-lg
-                      shadow-[0_8px_24px_rgba(0,0,0,0.12)] overflow-hidden"
+          className="
+              absolute bottom-full right-0 mb-3
+              w-[320px] max-w-[min(90vw,320px)]
+              bg-white border border-gray-200 rounded-xl
+              shadow-[0_12px_32px_rgba(0,0,0,0.15)] overflow-hidden"
           >
-            <div className="max-h-56 overflow-auto">
+            <div className="max-h-64 overflow-auto">
               {tracks.map((t, i) => {
                 const active = i === idx;
                 return (
@@ -150,20 +152,20 @@ export default function Widget() {
                     onClick={() => {
                       setIdx(i);
                     }}
-                    className={`w-full text-left px-3 py-2.5 flex items-center gap-3
+                    className={`w-full text-left px-4 py-3 flex items-center gap-3
                             hover:bg-gray-50 transition ${
                               active ? "bg-gray-50" : ""
                             }`}
                   >
                     <div
-                      className={`w-8 h-8 rounded
+                      className={`w-10 h-10 rounded
                                  ${active ? "bg-gray-900" : "bg-gray-200"}
                                  flex items-center justify-center text-white`}
                     >
                       {active ? (
                         <svg
-                          width="15"
-                          height="15"
+                          width="16"
+                          height="16"
                           viewBox="0 0 24 24"
                           fill="currentColor"
                         >
@@ -171,8 +173,8 @@ export default function Widget() {
                         </svg>
                       ) : (
                         <svg
-                          width="15"
-                          height="15"
+                          width="16"
+                          height="16"
                           viewBox="0 0 24 24"
                           fill="currentColor"
                           className="text-gray-700"
@@ -215,17 +217,17 @@ export default function Widget() {
           className="w-full bg-white border border-gray-200 rounded-lg
                     shadow-[0_6px_20px_rgba(0,0,0,0.10)]"
         >
-          <div className="grid grid-cols-3 place-items-center px-2.5 py-2">
+          <div className="grid grid-cols-3 items-center px-4 py-3.5 gap-x-3">
             {/* Play/Pause */}
             <button
               onClick={togglePlay}
-              className="w-7 h-7 flex items-center justify-center text-black"
+              className="w-8 h-8 flex items-center justify-center text-black"
               title="Play/Pause"
             >
               {isPlaying ? (
                 <svg
-                  width="18"
-                  height="18"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -233,8 +235,8 @@ export default function Widget() {
                 </svg>
               ) : (
                 <svg
-                  width="18"
-                  height="18"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
