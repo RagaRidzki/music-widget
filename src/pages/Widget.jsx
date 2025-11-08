@@ -85,103 +85,36 @@ export default function Widget() {
   if (loading || !widget || !open) {
     // saat ditutup, jangan render apa-apa
     if (!open) return null;
-    return <div className="fixed bottom-4 right-4 bg-white text-gray-900 rounded-md shadow-lg p-3">Loading…</div>;
+    return <div className="fixed bottom-4 right-4 bg-white text-gray-900 rounded-xl shadow-lg p-3">Loading…</div>;
   }
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      {/* Panel utama (putih) */}
-      <div className="bg-white text-gray-900 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-gray-200 w-[120px] p-8 overflow-hidden">
-        <audio
-          ref={audioRef}
-          key={srcUrl}
-          className="hidden"
-          preload="auto"
-          crossOrigin="anonymous"
-          onLoadedMetadata={onLoadedMeta}
-          onCanPlay={onCanPlay}
-          onPlay={onPlay}
-          onPause={onPause}
-          onEnded={onEnded}
-          onError={onError}
-        >
-          {guessType() ? <source src={srcUrl} type={guessType()} /> : <source src={srcUrl} />}
-        </audio>
-
-        {/* Row current track */}
-        {/* <div className="px-4 py-3">
-          <div className="text-base font-semibold truncate">{current?.title || `Track ${idx + 1}`}</div>
-          {current?.artist && <div className="text-xs text-gray-500 truncate">{current.artist}</div>}
-        </div> */}
-
-        {/* Controls bar */}
-        <div className="flex items-center gap-2 px-3 pb-3">
-          {/* Play/Pause */}
-          <button
-            onClick={togglePlay}
-            title="Play/Pause"
-            className="flex items-center justify-center w-10 h-10 rounded-md bg-gray-900 text-white hover:bg-black transition"
-          >
-            {isPlaying ? (
-              // pause icon
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
-            ) : (
-              // play icon
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            )}
-          </button>
-
-          {/* Playlist toggle */}
-          <button
-            onClick={() => setShowList((s) => !s)}
-            title="Playlist"
-            className="flex items-center justify-center w-10 h-10 rounded-md bg-gray-100 text-gray-900 hover:bg-gray-200 transition"
-          >
-            {/* list icon */}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M4 6h16v2H4zM4 11h10v2H4zM4 16h16v2H4z"/>
-            </svg>
-          </button>
-
-          {/* Close widget */}
-          <button
-            onClick={() => setOpen(false)}
-            title="Close"
-            className="ml-auto flex items-center justify-center w-10 h-10 rounded-md bg-gray-100 text-gray-900 hover:bg-gray-200 transition"
-          >
-            {/* close icon */}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.7 2.88 18.29 9.17 12 2.88 5.71 4.29 4.29 10.59 10.6l6.3-6.3z"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Playlist panel */}
-        {showList && (
-          <div className="border-t border-gray-200 max-h-56 overflow-auto">
+      {/* ====== PLAYLIST PANEL (muncul ke ATAS) ====== */}
+      {showList && (
+        <div className="mb-2 w-[320px] bg-white border border-gray-200 shadow-[0_8px_24px_rgba(0,0,0,0.12)] rounded-md overflow-hidden">
+          <div className="max-h-60 overflow-auto">
             {tracks.map((t, i) => {
               const active = i === idx;
               return (
                 <button
                   key={t.id || i}
-                  onClick={() => { setIdx(i); setShowList(false); }}
-                  className={`w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition ${active ? "bg-gray-50" : ""}`}
+                  onClick={() => { setIdx(i); }}
+                  className={`w-full text-left px-3 py-3 flex items-center gap-3 hover:bg-gray-50 transition ${active ? "bg-gray-50" : ""}`}
                 >
-                  {/* thumbnail placeholder (optional) */}
-                  <div className={`w-10 h-10 rounded-md ${active ? "bg-gray-900" : "bg-gray-200"} flex items-center justify-center text-white`}>
+                  <div className={`w-9 h-9 rounded ${active ? "bg-gray-900" : "bg-gray-200"} flex items-center justify-center text-white`}>
                     {active ? (
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
                     ) : (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-gray-500"><path d="M8 5v14l11-7z"/></svg>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-gray-600"><path d="M8 5v14l11-7z"/></svg>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className={`text-sm font-semibold truncate ${active ? "text-gray-900" : "text-gray-800"}`}>
+                    <div className={`text-sm font-medium truncate ${active ? "text-gray-900" : "text-gray-800"}`}>
                       {t.title || `Track ${i + 1}`}
                     </div>
                     {t.artist && <div className="text-xs text-gray-500 truncate">{t.artist}</div>}
                   </div>
-                  {/* (opsional) durasi kalau punya */}
                   {Number.isFinite(t.duration_sec) && (
                     <div className="text-xs text-gray-500">
                       {Math.floor(t.duration_sec / 60)}:{String(Math.floor(t.duration_sec % 60)).padStart(2, "0")}
@@ -191,11 +124,62 @@ export default function Widget() {
               );
             })}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* debug kecil */}
-        {dbg && <div className="px-4 pb-3 pt-1 text-[10px] text-gray-400">{dbg}</div>}
+      {/* ====== PILL KONTROL (sesuai gambar) ====== */}
+      <div className="w-60 bg-white border border-gray-200 rounded-md shadow-[0_6px_24px_rgba(0,0,0,0.12)]">
+        <div className="flex items-center justify-between px-4 py-2.5">
+          {/* Play / Pause */}
+          <button
+            onClick={togglePlay}
+            className="w-6 h-6 text-black flex items-center justify-center"
+            title="Play/Pause"
+          >
+            {isPlaying ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            )}
+          </button>
+
+          {/* Playlist */}
+          <button
+            onClick={() => setShowList((s) => !s)}
+            className="w-6 h-6 text-black flex items-center justify-center"
+            title="Playlist"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 6h12v2H4zM4 11h12v2H4zM4 16h12v2H4zM19 6h1v2h-1zM19 11h1v2h-1zM19 16h1v2h-1z"/>
+            </svg>
+          </button>
+
+          {/* Close */}
+          <button
+            onClick={() => setOpen(false)}
+            className="w-6 h-6 text-black flex items-center justify-center"
+            title="Close"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.7 2.88 18.29 9.17 12 2.88 5.71 4.29 4.29 10.59 10.6l6.3-6.3z"/>
+            </svg>
+          </button>
+        </div>
       </div>
+
+      {/* AUDIO ELEMENT (hidden – logic tetap) */}
+      <audio
+        ref={audioRef}
+        key={srcUrl}
+        className="hidden"
+        preload="auto"
+        crossOrigin="anonymous"
+        onPlay={onPlay}
+        onPause={onPause}
+        onEnded={onEnded}
+      >
+        {guessType() ? <source src={srcUrl} type={guessType()} /> : <source src={srcUrl} />}
+      </audio>
     </div>
   );
 }
