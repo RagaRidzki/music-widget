@@ -137,7 +137,7 @@ export default function Widget() {
         {" "}
         {showList && (
           <div
-          className="
+            className="
               absolute bottom-full right-0 mb-3
               w-[320px] max-w-[min(90vw,320px)]
               bg-white border border-gray-200 rounded-xl
@@ -212,22 +212,19 @@ export default function Widget() {
             </div>
           </div>
         )}
-        {/* PILL kontrol: lebih kecil, ikon sedikit lebih besar, spacing pas */}
-        <div
-          className="w-full bg-white border border-gray-200 rounded-lg
-                    shadow-[0_6px_20px_rgba(0,0,0,0.10)]"
-        >
-          <div className="grid grid-cols-3 items-center px-2 py-3.5 gap-x-1">
-            {/* Play/Pause */}
+        {/* PILL kontrol: 2 kolom (Play | [Playlist Close]) */}
+        <div className="w-full bg-white border border-gray-200 rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.10)]">
+          <div className="grid grid-cols-2 items-center px-3 py-3">
+            {/* LEFT: Play/Pause (lebih besar) */}
             <button
               onClick={togglePlay}
-              className="w-8 h-8 flex items-center justify-center text-black"
+              className="w-10 h-10 flex items-center justify-center text-black"
               title="Play/Pause"
             >
               {isPlaying ? (
                 <svg
-                  width="24"
-                  height="24"
+                  width="26"
+                  height="26"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -235,8 +232,8 @@ export default function Widget() {
                 </svg>
               ) : (
                 <svg
-                  width="24"
-                  height="24"
+                  width="26"
+                  height="26"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -245,37 +242,38 @@ export default function Widget() {
               )}
             </button>
 
-            {/* Playlist */}
-            <button
-              onClick={() => setShowList((s) => !s)}
-              className="w-7 h-7 flex items-center justify-center text-black"
-              title="Playlist"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="currentColor"
+            {/* RIGHT: Playlist + Close (satu baris, ada jarak) */}
+            <div className="flex items-center justify-end gap-4">
+              <button
+                onClick={() => setShowList((s) => !s)}
+                className="w-9 h-9 flex items-center justify-center text-black"
+                title="Playlist"
               >
-                <path d="M4 6h12v2H4zM4 11h12v2H4zM4 16h12v2H4zM19 6h1v2h-1zM19 11h1v2h-1zM19 16h1v2h-1z" />
-              </svg>
-            </button>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M4 6h12v2H4zM4 11h12v2H4zM4 16h12v2H4zM19 6h1v2h-1zM19 11h1v2h-1zM19 16h1v2h-1z" />
+                </svg>
+              </button>
 
-            {/* Close */}
-            <button
-              onClick={() => setOpen(false)}
-              className="w-7 h-7 flex items-center justify-center text-black"
-              title="Close"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="currentColor"
+              <button
+                onClick={() => setOpen(false)}
+                className="w-9 h-9 flex items-center justify-center text-black"
+                title="Close"
               >
-                <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.7 2.88 18.29 9.17 12 2.88 5.71 4.29 4.29 10.59 10.6l6.3-6.3z" />
-              </svg>
-            </button>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.7 2.88 18.29 9.17 12 2.88 5.71 4.29 4.29 10.59 10.6l6.3-6.3z" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
         {/* AUDIO (tetap) */}
