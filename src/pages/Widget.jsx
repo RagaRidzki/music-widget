@@ -62,8 +62,6 @@ export default function Widget() {
     switchingRef.current = false;
   }, [srcUrl]);
 
-  
-
   const onLoadedMeta = (e) =>
     setDbg(`loadedmetadata: ${e.target.duration?.toFixed?.(2) ?? "n/a"}s`);
   // const onCanPlay = () => setDbg((p) => (p ? p + " | canplay" : "canplay"));
@@ -80,8 +78,6 @@ export default function Widget() {
       src: el.currentSrc,
     });
   };
-
-  
 
   const guessType = () => {
     const u = srcUrl.toLowerCase();
@@ -109,7 +105,7 @@ export default function Widget() {
       }
     }
   };
-  
+
   async function togglePlay() {
     const el = audioRef.current;
     if (!el) return;
@@ -126,7 +122,6 @@ export default function Widget() {
       setDbg(`play error: ${e?.message || e}`);
     }
   }
-  
 
   if (loading || !widget || !open) {
     // saat ditutup, jangan render apa-apa
@@ -150,27 +145,29 @@ export default function Widget() {
   async function handleTrackClick(i) {
     const el = audioRef.current;
     if (!el) return;
-  
+
     // bersihkan timer autoplay sebelumnya
     if (playTimerRef.current) {
       clearTimeout(playTimerRef.current);
       playTimerRef.current = null;
     }
-  
+
     if (i === idx) {
       // track aktif -> toggle play/pause
       return togglePlay();
     }
-  
+
     // ganti track: pause, reset posisi, lock switching
     switchingRef.current = true;
-    try { el.pause(); } catch {}
+    try {
+      el.pause();
+    } catch {}
     el.currentTime = 0;
-  
+
     // minta autoplay sekali ketika source baru siap
     autoplayAfterSrcRef.current = true;
     setIdx(i);
-  
+
     // fallback tipis jika onCanPlay telat
     playTimerRef.current = setTimeout(async () => {
       try {
@@ -180,7 +177,6 @@ export default function Widget() {
       switchingRef.current = false;
     }, 120);
   }
-  
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
@@ -211,7 +207,8 @@ export default function Widget() {
                                  ${active ? "bg-gray-900" : "bg-gray-200"}
                                  flex items-center justify-center text-white`}
                     >
-                      {active ? (
+                      {active && isPlaying ? (
+                        // PAUSE saat track aktif & sedang play
                         <svg
                           width="16"
                           height="16"
@@ -221,12 +218,12 @@ export default function Widget() {
                           <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
                         </svg>
                       ) : (
+                        // PLAY untuk track non-aktif atau aktif tapi sedang pause
                         <svg
                           width="16"
                           height="16"
                           viewBox="0 0 24 24"
                           fill="currentColor"
-                          className="text-gray-700"
                         >
                           <path d="M8 5v14l11-7z" />
                         </svg>
