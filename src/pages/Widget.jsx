@@ -217,7 +217,7 @@ export default function Widget() {
           className="w-full bg-white border border-gray-200 rounded-lg
                     shadow-[0_6px_20px_rgba(0,0,0,0.10)]"
         >
-          <div className="grid grid-cols-3 items-center px-4 py-3.5 gap-x-3">
+          <div className="grid grid-cols-3 items-center px-2 py-3.5 gap-x-1">
             {/* Play/Pause */}
             <button
               onClick={togglePlay}
