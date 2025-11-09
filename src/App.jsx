@@ -11,16 +11,9 @@ export default function App() {
         <Route path="/create" element={<Create />} />
         <Route path="/:slug" element={<Widget />} />
         <Route path="/embed/:slug" element={<Embed />} />
-        <Route
-          path="/embed"
-          element={
-            <div style={{ font: "14px system-ui", padding: 12 }}>
-              No widget selected
-            </div>
-          }
-        />
         <Route path="*" element={<Create />} />
       </Routes>
     </BrowserRouter>
   );
 }
+
