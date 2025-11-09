@@ -8,8 +8,7 @@
         "source": "/(.*)",
         "headers": [
           {
-            "key": "Content-Security-Policy",
-            "value": "frame-ancestors 'self' https://canva.com https://*.canva.com https://*.canva.site https://*.canva.dev https://*.canvausercontent.com;"
+            "key": "Content-Security-Policy"
           },
           { "key": "Referrer-Policy", "value": "no-referrer-when-downgrade" },
           { "key": "X-Content-Type-Options", "value": "nosniff" }

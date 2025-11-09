@@ -23,12 +23,11 @@ export default async function handler(req, res) {
             u.protocol = "https:";
         }
 
-        const slug = u.pathname.replace(/^\/+/, "");
+        const slug = u.pathname.replace(/^\/+/, "") || "home";
         const w = Math.min(parseInt(maxwidth || "400", 10) || 400, 1200);
         const h = Math.min(parseInt(maxheight || "180", 10) || 180, 800);
 
-        const iframeSlug = slug ? `/embed/${slug}` : `/embed/`;
-        const iframe = `<iframe src="${host}${iframeSlug}" width="${w}" height="${h}" style="border:0;overflow:hidden;border-radius:12px" allow="autoplay; clipboard-write" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+        const iframe = `<iframe src="${host}/${slug}" width="${w}" height="${h}" style="border:0;overflow:hidden;border-radius:12px" allow="autoplay; clipboard-write" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
 
         // CSP yang mengizinkan Canva sebagai parent
         res.setHeader(

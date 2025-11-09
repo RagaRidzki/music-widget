@@ -10,7 +10,6 @@ export default function App() {
       <Routes>
         <Route path="/create" element={<Create />} />
         <Route path="/:slug" element={<Widget />} />
-        <Route path="/embed/:slug" element={<Embed />} />
         <Route path="*" element={<Create />} />
       </Routes>
     </BrowserRouter>
