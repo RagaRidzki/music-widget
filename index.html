@@ -1,13 +1,14 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <link rel="alternate" type="application/json+oembed" href="/api/oembed">
   <!-- CSP: boleh tetap ada sebagai fallback, tapi header vercel.json yg utama -->
   <meta http-equiv="Content-Security-Policy"
-        content="frame-ancestors https://canva.com https://*.canva.com https://*.canva.site https://*.canva.dev 'self';">
+    content="frame-ancestors https://canva.com https://*.canva.com https://*.canva.site https://*.canva.dev 'self';">
 
   <title>music-widget</title>
 
@@ -20,12 +21,14 @@
         link.type = 'application/json+oembed';
         link.href = location.origin + '/api/oembed?url=' + encodeURIComponent(location.href);
         document.head.appendChild(link);
-      } catch (e) {}
+      } catch (e) { }
     })();
   </script>
 </head>
+
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
+
 </html>

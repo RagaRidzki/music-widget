@@ -7,21 +7,12 @@
       {
         "source": "/(.*)",
         "headers": [
-          { "key": "X-Frame-Options", "value": "" },
           {
             "key": "Content-Security-Policy",
-            "value": "frame-ancestors https://canva.com https://*.canva.com https://*.canva.site https://*.canva.dev 'self';"
+            "value": "frame-ancestors 'self' https://canva.com https://*.canva.com https://*.canva.site https://*.canva.dev https://*.canvausercontent.com;"
           },
           { "key": "Referrer-Policy", "value": "no-referrer-when-downgrade" },
           { "key": "X-Content-Type-Options", "value": "nosniff" }
-        ]
-      },
-      {
-        "source": "/api/oembed",
-        "headers": [
-          { "key": "Access-Control-Allow-Origin", "value": "*" },
-          { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-          { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
         ]
       }
     ]
