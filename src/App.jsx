@@ -2,7 +2,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Create from "./pages/Create";
 import Widget from "./pages/Widget";
-import Embed from "./pages/Embed.jsx";
 
 export default function App() {
   return (
