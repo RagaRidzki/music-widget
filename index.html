@@ -5,7 +5,10 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="alternate" type="application/json+oembed" href="/api/oembed">
+  <!-- di dalam <head> -->
+  <link rel="alternate" type="application/json+oembed" href="https://music-widget-delta.vercel.app/api/oembed"
+    title="Music Widget" />
+
   <!-- CSP: boleh tetap ada sebagai fallback, tapi header vercel.json yg utama -->
   <meta http-equiv="Content-Security-Policy"
     content="frame-ancestors https://canva.com https://*.canva.com https://*.canva.site https://*.canva.dev 'self';">
