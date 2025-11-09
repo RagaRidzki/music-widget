@@ -1,46 +1,39 @@
-export default async function handler(req, res) {
-    try {
-        const fullUrl = (req.query.url || "").toString();
-        const m = fullUrl.match(/\/([a-z0-9]{6,12})(?:[/?#]|$)/i);
-        const slug = m ? m[1] : null;
-
-        if (!slug) {
-            return res.status(400).json({ error: "Bad url" });
-        }
-
-        const pageUrl = `https://music-widget-delta.vercel.app/${slug}`;
-        const iframeSrc = pageUrl; 
-        const width = 400;
-        const height = 180;
-
-        const html = `
-        <iframe
-            src="${iframeSrc}"
-            width="${width}"
-            height="${height}"
-            style="border:0;overflow:hidden;border-radius:12px"
-            allow="autoplay; clipboard-write"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
-        </iframe>`.trim();
-
-        res.setHeader("Content-Type", "application/json; charset=utf-8");
-        res.setHeader("Access-Control-Allow-Origin", "*");
-
-        return res.status(200).json({
-            version: "1.0",
-            type: "rich",
-            provider_name: "Music Widget",
-            provider_url: "https://music-widget-delta.vercel.app",
-            title: `Music Widget – ${slug}`,
-            width,
-            height,
-            html,
-            thumbnail_width: width,
-            thumbnail_height: height,
-        });
-    } catch (e) {
-        console.error(e);
-        return res.status(500).json({ error: "oEmbed error" });
+// /api/oembed.js
+export default function handler(req, res) {
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      return res.status(200).end();
     }
-}
+  
+    const url = (req.query.url || '').toString();
+    const u = new URL(url || '', `https://${req.headers.host}`);
+    // validasi basic
+    if (!u.hostname.endsWith('vercel.app')) {
+      return res.status(400).json({ error: 'invalid url' });
+    }
+  
+    const slugPath = u.pathname; // ex: /k76utd95
+    const src = `${u.origin}${slugPath}`;
+  
+    const payload = {
+      version: '1.0',
+      type: 'rich',
+      provider_name: 'Music Widget',
+      provider_url: `${u.origin}`,
+      title: `Music Widget – ${slugPath.replace('/', '')}`,
+      width: 400,
+      height: 180,
+      html: `<iframe src="${src}" width="400" height="180"
+              style="border:0;overflow:hidden;border-radius:12px"
+              allow="autoplay; clipboard-write"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"></iframe>`
+    };
+  
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.status(200).send(JSON.stringify(payload));
+  }
+  
