@@ -184,7 +184,7 @@ export default function Widget() {
         {" "}
         {showList && (
           <div
-            className="c:\Users\ASUS\Downloads\demo.mp3
+            className="
               absolute bottom-full right-0 mb-3
               w-[260px] max-w-[min(90vw,260px)]
               bg-white border border-gray-200 rounded-lg
