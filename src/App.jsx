@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Create from "./pages/Create";
 import Widget from "./pages/Widget";
+import Embed from "./pages/Embed.jsx";
 
 export default function App() {
   return (
@@ -9,9 +10,17 @@ export default function App() {
       <Routes>
         <Route path="/create" element={<Create />} />
         <Route path="/:slug" element={<Widget />} />
+        <Route path="/embed/:slug" element={<Embed />} />
+        <Route
+          path="/embed"
+          element={
+            <div style={{ font: "14px system-ui", padding: 12 }}>
+              No widget selected
+            </div>
+          }
+        />
         <Route path="*" element={<Create />} />
       </Routes>
     </BrowserRouter>
   );
 }
-
