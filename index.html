@@ -5,21 +5,11 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- di dalam <head> -->
   <link rel="alternate" type="application/json+oembed" href="/api/oembed" title="Music Widget" />
-
   <title>music-widget</title>
-  <script>
-    (function () {
-      try {
-        var link = document.createElement('link');
-        link.rel = 'alternate';
-        link.type = 'application/json+oembed';
-        link.href = location.origin + '/api/oembed?url=' + encodeURIComponent(location.href);
-        document.head.appendChild(link);
-      } catch (e) {}
-    })();
-  </script>
+  <link rel="alternate" type="application/json+oembed"
+    href="https://music-widget-delta.vercel.app/api/oembed?url=https://music-widget-delta.vercel.app"
+    title="Music Widget" />
 </head>
 
 <body>
