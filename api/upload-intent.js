@@ -42,7 +42,9 @@ export default async function handler(req, res) {
 
         const { signedUrl, token } = data;
 
-        const publicUrl = `${process.env.VITE_SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`;
+        const base = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+        const publicUrl = `${base}/storage/v1/object/public/${BUCKET}/${path}`;
+
 
         return res.status(200).json({
             slug: theSlug,

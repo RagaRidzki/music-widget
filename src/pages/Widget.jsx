@@ -16,6 +16,23 @@ export default function Widget() {
   const autoplayAfterSrcRef = useRef(false); // flag: sekali autoplay setelah source baru siap
   const switchingRef = useRef(false);
 
+  useEffect(() => {
+    const unlock = () => {
+      const el = audioRef.current;
+      if (!el) return;
+      // fade-in volume
+      el.muted = false;
+      el.volume = 0;
+      const step = () => {
+        el.volume = Math.min(1, el.volume + 0.15);
+        if (el.volume < 1) requestAnimationFrame(step);
+      };
+      step();
+    };
+    window.addEventListener("pointerdown", unlock, { once: true });
+    return () => window.removeEventListener("pointerdown", unlock);
+  }, []);
+
   // fetch widget
   useEffect(() => {
     let active = true;
@@ -93,11 +110,24 @@ export default function Widget() {
   function next() {
     setIdx((i) => (i + 1) % tracks.length);
   }
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el || !srcUrl) return;
+    try {
+      el.pause();
+    } catch {}
+    el.src = srcUrl;      // set langsung
+    el.load();            // parsing metadata cepat
+    autoplayAfterSrcRef.current = true;
+  }, [srcUrl]);
+  
   const onCanPlay = async () => {
+    const el = audioRef.current;
+    if (!el) return;
     if (autoplayAfterSrcRef.current) {
       autoplayAfterSrcRef.current = false;
       try {
-        await audioRef.current.play();
+        await el.play();         // ok karena muted
         setIsPlaying(true);
       } catch (e) {
         setDbg(`autoplay blocked: ${e?.message || e}`);
@@ -105,6 +135,7 @@ export default function Widget() {
       }
     }
   };
+  
 
   async function togglePlay() {
     const el = audioRef.current;
@@ -325,30 +356,17 @@ export default function Widget() {
         {/* AUDIO (tetap) */}
         <audio
           ref={audioRef}
-          key={srcUrl}
           className="hidden"
-          preload="auto"
+          preload="metadata"
           crossOrigin="anonymous"
+          muted // <— start muted (wajib)
           onCanPlay={onCanPlay}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onEnded={() => setIdx((i) => (i + 1) % tracks.length)}
         >
-          {(() => {
-            const u = srcUrl.toLowerCase();
-            const t = u.endsWith(".mp3")
-              ? "audio/mpeg"
-              : u.endsWith(".ogg")
-              ? "audio/ogg"
-              : u.endsWith(".m4a") || u.endsWith(".mp4")
-              ? "audio/mp4"
-              : undefined;
-            return t ? (
-              <source src={srcUrl} type={t} />
-            ) : (
-              <source src={srcUrl} />
-            );
-          })()}
+          {/* biarkan 1 <source>, atau set via effect (lihat C) */}
+          <source src={srcUrl} type={guessType()} />
         </audio>
       </div>
     </div>

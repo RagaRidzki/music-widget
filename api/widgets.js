@@ -75,37 +75,33 @@ export default async function handler(req, res) {
     if (req.method === "GET") {
       const slug = (req.query.slug || "").toString().trim();
       if (!slug) return res.status(400).json({ error: "slug is required" });
-
-      // 1) Ambil widget by slug
-      const { data: wData, error: wErr } = await supabaseAdmin
+    
+      // 🚀 1 query saja: join tracks
+      const { data, error } = await supabaseAdmin
         .from("widgets")
-        .select("*")
+        .select("id, slug, title, updated_at, tracks(*),")
         .eq("slug", slug)
         .single();
-
-      if (wErr) {
-        const code = wErr.code === "PGRST116" ? 404 : 500;
-        return res.status(code).json({ error: wErr.message });
+    
+      if (error) {
+        const code = error.code === "PGRST116" ? 404 : 500;
+        return res.status(code).json({ error: error.message });
       }
-
-      // 2) Ambil tracks terkait
-      const { data: tData, error: tErr } = await supabaseAdmin
-        .from("tracks")
-        .select("*")
-        .eq("widget_id", wData.id)
-        .order("order_index", { ascending: true });
-
-      if (tErr) return res.status(500).json({ error: tErr.message });
-
+    
+      // 🚀 cache agresif di edge/CDN + SWR
+      res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
+    
       return res.status(200).json({
         widget: {
-          id: wData.id,
-          slug: wData.slug,
-          title: wData.title,
-          tracks: tData || [],
+          id: data.id,
+          slug: data.slug,
+          title: data.title,
+          tracks: (data.tracks || []).sort((a,b) => (a.order_index ?? 0) - (b.order_index ?? 0)),
+          updated_at: data.updated_at,
         },
       });
     }
+    
 
     return res.status(405).json({ error: "Method not allowed" });
   } catch (e) {
