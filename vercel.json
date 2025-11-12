@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/:slug", "destination": "/api/head?url=https://music-widget-delta.vercel.app/:slug" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
