@@ -1,24 +1,20 @@
 // src/pages/Create.jsx
-
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
 
 export default function Create() {
-  
   const [files, setFiles] = useState([]);
   const [status, setStatus] = useState("");
-  const [slug, setSlug] = useState(""); // hanya untuk info setelah selesai
-  
-  // minta signed URL + upload 1 file 
+  const [slug, setSlug] = useState("");
+
   async function uploadOneFile(file, slugArg, index) {
     const resp = await fetch("/api/upload-intent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         fileName: file.name,
-        fileType: file.type,
-        // KUNCI: kirim null di file pertama agar server generate slug baru
-        slug: slugArg || null,
+        fileType: file.type || "audio/mpeg",
+        slug: slugArg || null,   // biar server generate slug untuk file pertama
         index,
       }),
     }).then((r) => r.json());
@@ -36,28 +32,27 @@ export default function Create() {
       orderIndex: resp.orderIndex,
       publicUrl: resp.publicUrl,
       fileType: resp.fileType || file.type || "audio/mpeg",
-      title: file.name.replace(/\.[^.]+$/, ""), // default judul dari nama file
+      title: file.name.replace(/\.[^.]+$/, ""),
     };
   }
 
   async function handleUpload() {
-    if (files.length === 0) return alert("Pilih dulu minimal 1 lagu");
-    if (files.length > 3) return alert("Maksimal 3 lagu!");
+    if (files.length === 0) return alert("Pilih minimal 1 lagu");
+    if (files.length > 3) return alert("Maksimal 3 lagu");
 
-    setStatus("Uploading...");
+    setStatus("Uploading…");
     try {
-      let currentSlug = ""; // KUNCI: selalu kosong → slug baru setiap batch
+      let currentSlug = "";
       const uploaded = [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const result = await uploadOneFile(file, currentSlug, i);
-        currentSlug = result.slug; // slug dari file pertama dipakai untuk file berikutnya di batch INI
+        currentSlug = result.slug; // slug pertama → konsisten untuk batch ini
         uploaded.push(result);
       }
 
-      setStatus("Menyimpan widget...");
-      // Simpan metadata widget (STEP 12)
+      setStatus("Menyimpan widget…");
       const save = await fetch("/api/widgets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -65,7 +60,7 @@ export default function Create() {
           slug: currentSlug,
           title: `My Widget ${currentSlug}`,
           tracks: uploaded
-            .map((u) => ({
+            .map(u => ({
               orderIndex: u.orderIndex ?? 0,
               publicUrl: u.publicUrl,
               fileType: u.fileType,
@@ -76,21 +71,14 @@ export default function Create() {
         }),
       }).then(async (r) => {
         const txt = await r.text();
-        try {
-          return JSON.parse(txt);
-        } catch {
-          throw new Error(`Non-JSON (${r.status})`);
-        }
+        try { return JSON.parse(txt); }
+        catch { throw new Error(`Non-JSON (${r.status})`); }
       });
 
       if (save?.error) throw new Error(save.error);
 
       setSlug(currentSlug);
       setStatus(`✅ Widget jadi! Buka /${currentSlug}`);
-
-      // OPSIONAL: kalau mau fitur "lanjutkan widget lama"
-      // localStorage.setItem("slug", currentSlug);
-      // lalu tampilkan tombol "Lanjutkan" terpisah (tidak otomatis).
     } catch (err) {
       console.error(err);
       setStatus(`❌ Error: ${err.message}`);
@@ -109,20 +97,15 @@ export default function Create() {
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
       <div className="mx-auto w-full max-w-3xl px-6 py-10">
-        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Buat Widget Baru
-          </h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Buat Widget Baru</h1>
           <p className="mt-2 text-sm text-neutral-400">
-            Upload sampai <span className="font-medium text-neutral-300">3 lagu</span> (mp3/ogg/m4a, max ~100MB/lagu),
+            Upload sampai <span className="font-medium text-neutral-300">3 lagu</span> (mp3/ogg/m4a),
             lalu kami buatkan widget playlist-mu otomatis.
           </p>
         </div>
 
-        {/* Card Upload */}
         <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
-          {/* Dropzone */}
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={onDrop}
@@ -130,16 +113,13 @@ export default function Create() {
           >
             <div className="flex flex-col items-center justify-center px-6 py-10 text-center">
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-neutral-800/70">
-                {/* cloud upload icon */}
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M19.35 10.04A7 7 0 005.3 7.1a5.5 5.5 0 00.8 10.9h12.2a4.5 4.5 0 001.05-8.96zM13 12v4h-2v-4H8l4-4 4 4h-3z"/>
                 </svg>
               </div>
 
               <h2 className="text-lg font-medium">Drag & drop lagu kamu di sini</h2>
-              <p className="mt-1 text-xs text-neutral-400">
-                Format: mp3, ogg, m4a • Maksimal 3 file
-              </p>
+              <p className="mt-1 text-xs text-neutral-400">Format: mp3, ogg, m4a • Maksimal 3 file</p>
 
               <label className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-200 active:scale-[0.98]">
                 <input
@@ -158,7 +138,6 @@ export default function Create() {
             </div>
           </div>
 
-          {/* Preview daftar file */}
           {files.length > 0 && (
             <div className="mx-6 mt-6 rounded-xl border border-neutral-800 bg-neutral-900/40">
               <div className="divide-y divide-neutral-800">
@@ -182,18 +161,11 @@ export default function Create() {
             </div>
           )}
 
-          {/* Actions */}
           <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-6">
-            <div className="text-xs text-neutral-500">
-              Tips: Upload batch = 1 widget. Upload batch baru → widget baru.
-            </div>
+            <div className="text-xs text-neutral-500">Tips: 1 batch upload = 1 widget.</div>
             <div className="flex gap-2">
               <button
-                onClick={() => {
-                  setFiles([]);
-                  setSlug("");
-                  setStatus("Siap bikin widget baru.");
-                }}
+                onClick={() => { setFiles([]); setSlug(""); setStatus("Siap bikin widget baru."); }}
                 className="rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-sm hover:bg-neutral-800"
               >
                 Reset
@@ -209,7 +181,6 @@ export default function Create() {
           </div>
         </div>
 
-        {/* Status & link hasil */}
         <div className="mt-6 flex items-center justify-between">
           <p className="text-sm text-neutral-300">{status}</p>
           {slug && (

@@ -7,20 +7,20 @@ export default function Widget() {
   const [loading, setLoading] = useState(true);
   const [widget, setWidget] = useState(null);
   const [idx, setIdx] = useState(0);
-  const [open, setOpen] = useState(true); // show/hide widget
-  const [showList, setShowList] = useState(false); // toggle playlist panel
+  const [open, setOpen] = useState(true);
+  const [showList, setShowList] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
   const [dbg, setDbg] = useState("");
-  const playTimerRef = useRef(null); // nyimpen timer autoplay fallback
-  const autoplayAfterSrcRef = useRef(false); // flag: sekali autoplay setelah source baru siap
+  const playTimerRef = useRef(null);
+  const autoplayAfterSrcRef = useRef(false);
   const switchingRef = useRef(false);
 
+  // unlock: unmute + fade-in saat gesture pertama
   useEffect(() => {
     const unlock = () => {
       const el = audioRef.current;
       if (!el) return;
-      // fade-in volume
       el.muted = false;
       el.volume = 0;
       const step = () => {
@@ -33,22 +33,18 @@ export default function Widget() {
     return () => window.removeEventListener("pointerdown", unlock);
   }, []);
 
-  // fetch widget
+  // fetch config widget
   useEffect(() => {
     let active = true;
     (async () => {
       setLoading(true);
       try {
-        const resp = await fetch(
-          `/api/widgets?slug=${encodeURIComponent(slug)}`
-        ).then(async (r) => {
-          const t = await r.text();
-          try {
-            return JSON.parse(t);
-          } catch {
-            return { error: `Non-JSON (${r.status})`, raw: t };
-          }
-        });
+        const resp = await fetch(`/api/widgets?slug=${encodeURIComponent(slug)}`)
+          .then(async (r) => {
+            const t = await r.text();
+            try { return JSON.parse(t); }
+            catch { return { error: `Non-JSON (${r.status})`, raw: t }; }
+          });
         if (!active) return;
         if (resp.error) throw new Error(resp.error);
         setWidget(resp.widget);
@@ -60,16 +56,14 @@ export default function Widget() {
         if (active) setLoading(false);
       }
     })();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [slug]);
 
   const tracks = useMemo(() => widget?.tracks || [], [widget]);
   const current = tracks[idx];
   const srcUrl = (current?.url || current?.publicUrl || "").trim();
 
-  // minta autoplay SEKALI setelah source siap (lewat onCanPlay)
+  // autoplay sekali setelah source siap
   useEffect(() => {
     if (playTimerRef.current) {
       clearTimeout(playTimerRef.current);
@@ -79,22 +73,15 @@ export default function Widget() {
     switchingRef.current = false;
   }, [srcUrl]);
 
-  const onLoadedMeta = (e) =>
-    setDbg(`loadedmetadata: ${e.target.duration?.toFixed?.(2) ?? "n/a"}s`);
-  // const onCanPlay = () => setDbg((p) => (p ? p + " | canplay" : "canplay"));
-  const onPlay = () => setIsPlaying(true);
-  const onPause = () => setIsPlaying(false);
-  const onEnded = () => next(); // auto next
-  const onError = (e) => {
-    const el = e.target,
-      err = el.error;
-    setDbg(`error: code=${err?.code} networkState=${el.networkState}`);
-    console.error("AUDIO ERROR", {
-      code: err?.code,
-      message: err?.message,
-      src: el.currentSrc,
-    });
-  };
+  // set src langsung ke <audio> (tanpa remount)
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el || !srcUrl) return;
+    try { el.pause(); } catch {}
+    el.src = srcUrl;
+    el.load();
+    autoplayAfterSrcRef.current = true;
+  }, [srcUrl]);
 
   const guessType = () => {
     const u = srcUrl.toLowerCase();
@@ -104,43 +91,26 @@ export default function Widget() {
     return undefined;
   };
 
-  function prev() {
-    setIdx((i) => (i - 1 + tracks.length) % tracks.length);
-  }
-  function next() {
-    setIdx((i) => (i + 1) % tracks.length);
-  }
-  useEffect(() => {
-    const el = audioRef.current;
-    if (!el || !srcUrl) return;
-    try {
-      el.pause();
-    } catch {}
-    el.src = srcUrl;      // set langsung
-    el.load();            // parsing metadata cepat
-    autoplayAfterSrcRef.current = true;
-  }, [srcUrl]);
-  
   const onCanPlay = async () => {
     const el = audioRef.current;
     if (!el) return;
     if (autoplayAfterSrcRef.current) {
       autoplayAfterSrcRef.current = false;
       try {
-        await el.play();         // ok karena muted
+        await el.play(); // ok karena muted
         setIsPlaying(true);
       } catch (e) {
         setDbg(`autoplay blocked: ${e?.message || e}`);
         setIsPlaying(false);
+      } finally {
+        switchingRef.current = false; // release lock
       }
     }
   };
-  
 
   async function togglePlay() {
     const el = audioRef.current;
-    if (!el) return;
-    if (switchingRef.current) return; // cegah spam saat switch
+    if (!el || switchingRef.current) return;
     try {
       if (el.paused) {
         await el.play();
@@ -154,14 +124,30 @@ export default function Widget() {
     }
   }
 
-  if (loading || !widget || !open) {
-    // saat ditutup, jangan render apa-apa
-    if (!open) return null;
-    return (
-      <div className="fixed bottom-4 right-4 bg-white text-gray-900 rounded-lg shadow-lg p-3">
-        Loading…
-      </div>
-    );
+  async function handleTrackClick(i) {
+    const el = audioRef.current;
+    if (!el) return;
+
+    // cleanup timer sebelumnya
+    if (playTimerRef.current) {
+      clearTimeout(playTimerRef.current);
+      playTimerRef.current = null;
+    }
+
+    if (i === idx) return togglePlay();
+
+    switchingRef.current = true;
+    try { el.pause(); } catch {}
+    el.currentTime = 0;
+
+    autoplayAfterSrcRef.current = true;
+    setIdx(i);
+
+    // fallback tipis jika onCanPlay telat
+    playTimerRef.current = setTimeout(async () => {
+      try { await el.play(); setIsPlaying(true); } catch {}
+      switchingRef.current = false;
+    }, 120);
   }
 
   if (!open) return null;
@@ -173,46 +159,9 @@ export default function Widget() {
     );
   }
 
-  async function handleTrackClick(i) {
-    const el = audioRef.current;
-    if (!el) return;
-
-    // bersihkan timer autoplay sebelumnya
-    if (playTimerRef.current) {
-      clearTimeout(playTimerRef.current);
-      playTimerRef.current = null;
-    }
-
-    if (i === idx) {
-      // track aktif -> toggle play/pause
-      return togglePlay();
-    }
-
-    // ganti track: pause, reset posisi, lock switching
-    switchingRef.current = true;
-    try {
-      el.pause();
-    } catch {}
-    el.currentTime = 0;
-
-    // minta autoplay sekali ketika source baru siap
-    autoplayAfterSrcRef.current = true;
-    setIdx(i);
-
-    // fallback tipis jika onCanPlay telat
-    playTimerRef.current = setTimeout(async () => {
-      try {
-        await el.play();
-        setIsPlaying(true);
-      } catch {}
-      switchingRef.current = false;
-    }, 120);
-  }
-
   return (
     <div className="fixed bottom-4 right-4 z-50">
       <div className="relative w-40">
-        {" "}
         {showList && (
           <div
             className="
@@ -228,59 +177,26 @@ export default function Widget() {
                   <button
                     key={t.id || i}
                     onClick={() => handleTrackClick(i)}
-                    className={`w-full text-left px-3.5 py-2.5 flex items-center gap-3
-                            hover:bg-gray-50 transition ${
-                              active ? "bg-gray-50" : ""
-                            }`}
+                    className={`w-full text-left px-3.5 py-2.5 flex items-center gap-3 hover:bg-gray-50 transition ${active ? "bg-gray-50" : ""}`}
                   >
-                    <div
-                      className={`w-9 h-9 rounded
-                                 ${active ? "bg-gray-900" : "bg-gray-200"}
-                                 flex items-center justify-center text-white`}
-                    >
+                    <div className={`w-9 h-9 rounded ${active ? "bg-gray-900" : "bg-gray-200"} flex items-center justify-center text-white`}>
                       {active && isPlaying ? (
-                        // PAUSE saat track aktif & sedang play
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
-                        </svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg>
                       ) : (
-                        // PLAY untuk track non-aktif atau aktif tapi sedang pause
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div
-                        className={`text-sm font-medium truncate ${
-                          active ? "text-gray-900" : "text-gray-800"
-                        }`}
-                      >
+                      <div className={`text-sm font-medium truncate ${active ? "text-gray-900" : "text-gray-800"}`}>
                         {t.title || `Track ${i + 1}`}
                       </div>
                       {t.artist && (
-                        <div className="text-xs text-gray-500 truncate">
-                          {t.artist}
-                        </div>
+                        <div className="text-xs text-gray-500 truncate">{t.artist}</div>
                       )}
                     </div>
                     {Number.isFinite(t.duration_sec) && (
                       <div className="text-xs text-gray-500">
-                        {Math.floor(t.duration_sec / 60)}:
-                        {String(Math.floor(t.duration_sec % 60)).padStart(
-                          2,
-                          "0"
-                        )}
+                        {Math.floor(t.duration_sec / 60)}:{String(Math.floor(t.duration_sec % 60)).padStart(2, "0")}
                       </div>
                     )}
                   </button>
@@ -289,83 +205,48 @@ export default function Widget() {
             </div>
           </div>
         )}
-        {/* PILL kontrol: 2 kolom (Play | [Playlist Close]) */}
+
+        {/* pill controls */}
         <div className="w-full bg-white border border-gray-200 rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.10)]">
           <div className="grid grid-cols-2 items-center px-3 py-3">
-            {/* LEFT: Play/Pause (lebih besar) */}
-            <button
-              onClick={togglePlay}
-              className="w-12 h-12 flex items-center justify-center text-black"
-              title="Play/Pause"
-            >
+            <button onClick={togglePlay} className="w-12 h-12 flex items-center justify-center text-black" title="Play/Pause">
               {isPlaying ? (
-                <svg
-                  width="30"
-                  height="30"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
-                </svg>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z" /></svg>
               ) : (
-                <svg
-                  width="30"
-                  height="30"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
               )}
             </button>
 
-            {/* RIGHT: Playlist + Close (satu baris, ada jarak) */}
             <div className="flex items-center justify-end gap-2">
-              <button
-                onClick={() => setShowList((s) => !s)}
-                className="w-8 h-8 flex items-center justify-center text-black"
-                title="Playlist"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M4 6h12v2H4zM4 11h12v2H4zM4 16h12v2H4zM19 6h1v2h-1zM19 11h1v2h-1zM19 16h1v2h-1z" />
-                </svg>
+              <button onClick={() => setShowList((s) => !s)} className="w-8 h-8 flex items-center justify-center text-black" title="Playlist">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h12v2H4zM4 11h12v2H4zM4 16h12v2H4zM19 6h1v2h-1zM19 11h1v2h-1zM19 16h1v2h-1z" /></svg>
               </button>
-
-              <button
-                onClick={() => setOpen(false)}
-                className="w-8 h-8 flex items-center justify-center text-black"
-                title="Close"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.7 2.88 18.29 9.17 12 2.88 5.71 4.29 4.29 10.59 10.6l6.3-6.3z" />
-                </svg>
+              <button onClick={() => setOpen(false)} className="w-8 h-8 flex items-center justify-center text-black" title="Close">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.7 2.88 18.29 9.17 12 2.88 5.71 4.29 4.29 10.59 10.6l6.3-6.3z" /></svg>
               </button>
             </div>
           </div>
         </div>
-        {/* AUDIO (tetap) */}
+
+        {/* hidden audio element */}
         <audio
           ref={audioRef}
           className="hidden"
           preload="metadata"
           crossOrigin="anonymous"
-          muted // <— start muted (wajib)
+          muted
+          playsInline
           onCanPlay={onCanPlay}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           onEnded={() => setIdx((i) => (i + 1) % tracks.length)}
+          onError={(e) => {
+            const el = e.target, err = el.error;
+            setDbg(`error: code=${err?.code} networkState=${el.networkState}`);
+            console.error("AUDIO ERROR", { code: err?.code, message: err?.message, src: el.currentSrc });
+          }}
         >
-          {/* biarkan 1 <source>, atau set via effect (lihat C) */}
+          {/* source tetap ada; tipe ditebak agar hint MIME jelas */}
           <source src={srcUrl} type={guessType()} />
         </audio>
       </div>
