@@ -1,7 +1,14 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/:slug", "destination": "/api/head?url=https://music-widget-delta.vercel.app/:slug" },
+
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/favicon.ico", "destination": "/favicon.ico" },
+    { "source": "/index.html", "destination": "/index.html" },
+
+    { "source": "/:slug", "destination": "/api/prerender?url=https://music-widget-delta.vercel.app/:slug" },
+
+    { "source": "/", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
@@ -9,11 +16,13 @@
       "source": "/(.*)",
       "headers": [
         {
-          "key": "Content-Security-Policy",
-          "value": "frame-ancestors 'self' https://canva.com https://*.canva.com https://*.canva.site https://*.canva.dev https://*.canvausercontent.com;"
+          "key": "Referrer-Policy",
+          "value": "no-referrer-when-downgrade"
         },
-        { "key": "Referrer-Policy", "value": "no-referrer-when-downgrade" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
       ]
     }
   ]
