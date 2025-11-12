@@ -10,15 +10,14 @@
 
   <title>music-widget</title>
   <script>
-    // optional: buat link dengan ?url=current
     (function () {
       try {
-        var l = document.createElement('link');
-        l.rel = 'alternate';
-        l.type = 'application/json+oembed';
-        l.href = location.origin + '/api/oembed?url=' + encodeURIComponent(location.href);
-        document.head.appendChild(l);
-      } catch (e) { }
+        var link = document.createElement('link');
+        link.rel = 'alternate';
+        link.type = 'application/json+oembed';
+        link.href = location.origin + '/api/oembed?url=' + encodeURIComponent(location.href);
+        document.head.appendChild(link);
+      } catch (e) {}
     })();
   </script>
 </head>
